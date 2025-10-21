@@ -1,75 +1,60 @@
 import { prisma } from '../../lib/db';
-import { CreateBookDTO, UpdateBookDTO, ListQueryDTO } from './books.validator';
 import { Prisma } from '@prisma/client';
+import { CreateBookDTO, UpdateBookDTO, ListQueryDTO } from './books.validator';
 
 export async function createBook(data: CreateBookDTO) {
   return prisma.book.create({ data });
 }
 
-export async function getBookById(id: string) {
+export async function getBookById(id: number) {
   return prisma.book.findFirst({
-    where: { id, isDeleted: false },
+    where: { id, deletedAt: null },
     include: { genre: true },
   });
 }
 
 export async function listBooks(query: ListQueryDTO) {
   const { q, genreId, page, limit } = query;
-  const { take, skip } = { take: query.limit, skip: (query.page - 1) * query.limit };
-
   const where: Prisma.BookWhereInput = {
-    isDeleted: false,
+    deletedAt: null,
     AND: [
-      genreId ? { genreId } : {},
-      q
-        ? {
-            OR: [
-              { title: { contains: q, mode: 'insensitive' } },
-              { author: { contains: q, mode: 'insensitive' } },
-              { description: { contains: q, mode: 'insensitive' } },
-            ],
-          }
-        : {},
-    ],
+      genreId ? { genreId: Number(genreId) } : {},
+      q ? {
+        OR: [
+          { title: { contains: q, mode: 'insensitive' } },
+          { author: { contains: q, mode: 'insensitive' } },
+        ]
+      } : {}
+    ]
   };
 
   const [items, total] = await Promise.all([
     prisma.book.findMany({
-      where,
-      include: { genre: true },
-      take,
-      skip,
-      orderBy: { createdAt: 'desc' },
+      where, include: { genre: true }, orderBy: { createdAt: 'desc' },
+      take: limit, skip: (page - 1) * limit
     }),
-    prisma.book.count({ where }),
+    prisma.book.count({ where })
   ]);
 
-  return {
-    items,
-    page,
-    limit,
-    total,
-    totalPages: Math.ceil(total / limit),
-  };
+  return { items, page, limit, total, totalPages: Math.ceil(total / limit) };
 }
 
-export async function listBooksByGenre(genreId: string, query: ListQueryDTO) {
+export async function listBooksByGenre(genreId: number, query: ListQueryDTO) {
   return listBooks({ ...query, genreId });
 }
 
-export async function updateBook(id: string, data: UpdateBookDTO) {
+export async function updateBook(id: number, data: UpdateBookDTO) {
   return prisma.book.update({
     where: { id },
     data,
-    select: { id: true, title: true, author: true, description: true, price: true, stock: true, genreId: true, updatedAt: true },
+    select: { id: true, title: true, author: true, price: true, stock: true, genreId: true, updatedAt: true },
   });
 }
 
-// "Safe delete": don't actually remove rows to preserve transaction history
-export async function deleteBookSafe(id: string) {
+export async function deleteBookSafe(id: number) {
   return prisma.book.update({
     where: { id },
-    data: { isDeleted: true },
-    select: { id: true, title: true, isDeleted: true },
+    data: { deletedAt: new Date() },
+    select: { id: true, title: true, deletedAt: true },
   });
 }

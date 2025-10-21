@@ -21,7 +21,7 @@
     "forceConsistentCasingInFileNames": true,
     "sourceMap": true,
     "noEmitOnError": true,
-    "types": ["node", "cors"]
+    "types": ["node"]
   },
   "include": ["src/**/*.ts"],
   "exclude": ["node_modules", "dist"]

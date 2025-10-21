@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
+import { ZodError } from 'zod';
 import { createGenreSchema, updateGenreSchema } from './genres.validator';
 import { createGenre, listGenres, getGenreById, updateGenre, deleteGenreSafe } from './genres.service';
-import { ZodError } from 'zod';
 
 export async function createGenreHandler(req: Request, res: Response) {
   try {
@@ -16,8 +16,8 @@ export async function createGenreHandler(req: Request, res: Response) {
 }
 
 export async function listGenresHandler(_req: Request, res: Response) {
-  const genres = await listGenres();
-  return res.json({ items: genres });
+  const items = await listGenres();
+  return res.json({ items });
 }
 
 export async function getGenreDetailHandler(req: Request, res: Response) {

@@ -5,10 +5,8 @@ import { createTransaction, listTransactions, getTransactionById, getStatistics 
 
 export async function createTransactionHandler(req: Request, res: Response) {
   try {
-    // If you protect with auth middleware, get userId from req.user.sub; else accept from body (not recommended).
-    const userId = (req as any).user?.sub || req.body.userId;
+    const userId = (req as any).user?.sub || req.body.userId; // use JWT if applied
     if (!userId) return res.status(401).json({ message: 'Unauthorized' });
-
     const dto = createTransactionSchema.parse(req.body);
     const order = await createTransaction(userId, dto);
     return res.status(201).json({ order });
@@ -21,8 +19,8 @@ export async function createTransactionHandler(req: Request, res: Response) {
 }
 
 export async function listTransactionsHandler(req: Request, res: Response) {
-  const page = Number(req.query.page || 1);
-  const limit = Math.min(100, Number(req.query.limit || 10));
+  const page = Math.max(1, Number(req.query.page || 1));
+  const limit = Math.min(100, Math.max(1, Number(req.query.limit || 10)));
   const data = await listTransactions(page, limit);
   return res.json(data);
 }
