@@ -1,9 +1,9 @@
-import { Prisma, PrismaClient } from '@prisma/client';
+import { Prisma } from '@prisma/client';
 import { CreateTransactionDTO } from './transactions.validator';
 import { prisma } from '../../lib/db';
 
 export async function createTransaction(userId: string, dto: CreateTransactionDTO) {
-  return prisma.$transaction(async (tx: PrismaClient) => {
+  return prisma.$transaction(async (tx: Prisma.TransactionClient) => {
     const bookIds = dto.items.map(i => i.bookId);
 
     const books = await tx.book.findMany({

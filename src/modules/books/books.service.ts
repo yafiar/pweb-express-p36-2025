@@ -6,7 +6,7 @@ export async function createBook(data: CreateBookDTO) {
   return prisma.book.create({ data });
 }
 
-export async function getBookById(id: number) {
+export async function getBookById(id: string) {
   return prisma.book.findFirst({
     where: { id, deletedAt: null },
     include: { genre: true },
@@ -15,17 +15,21 @@ export async function getBookById(id: number) {
 
 export async function listBooks(query: ListQueryDTO) {
   const { q, genreId, page, limit } = query;
+
   const where: Prisma.BookWhereInput = {
     deletedAt: null,
     AND: [
-      genreId ? { genreId: Number(genreId) } : {},
-      q ? {
-        OR: [
-          { title: { contains: q, mode: 'insensitive' } },
-          { author: { contains: q, mode: 'insensitive' } },
-        ]
-      } : {}
-    ]
+      genreId ? { genreId } : {},
+      q
+        ? {
+            OR: [
+              { title:     { contains: q, mode: 'insensitive' } },
+              { writer:    { contains: q, mode: 'insensitive' } },
+              { publisher: { contains: q, mode: 'insensitive' } },
+            ],
+          }
+        : {},
+    ],
   };
 
   const [items, total] = await Promise.all([
@@ -39,19 +43,30 @@ export async function listBooks(query: ListQueryDTO) {
   return { items, page, limit, total, totalPages: Math.ceil(total / limit) };
 }
 
-export async function listBooksByGenre(genreId: number, query: ListQueryDTO) {
+export async function listBooksByGenre(genreId: string, query: ListQueryDTO) {
   return listBooks({ ...query, genreId });
 }
 
-export async function updateBook(id: number, data: UpdateBookDTO) {
+export async function updateBook(id: string, data: UpdateBookDTO) {
   return prisma.book.update({
     where: { id },
     data,
-    select: { id: true, title: true, author: true, price: true, stock: true, genreId: true, updatedAt: true },
+    select: {
+      id: true,
+      title: true,
+      writer: true,
+      publisher: true,
+      publicationYear: true,
+      price: true,
+      stockQuantity: true,
+      genreId: true,
+      updatedAt: true,
+    },
   });
 }
 
-export async function deleteBookSafe(id: number) {
+export async function deleteBookSafe(id: string) {
+
   return prisma.book.update({
     where: { id },
     data: { deletedAt: new Date() },
