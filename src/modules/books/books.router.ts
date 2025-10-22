@@ -8,7 +8,7 @@ export const booksRouter = Router();
 
 booksRouter.post('/', createBookHandler);
 booksRouter.get('/', listBooksHandler);
-booksRouter.get('/:book_id', getBookDetailHandler);
 booksRouter.get('/genre/:genre_id', listBooksByGenreHandler);
+booksRouter.get('/:book_id', getBookDetailHandler);
 booksRouter.patch('/:book_id', updateBookHandler);
 booksRouter.delete('/:book_id', deleteBookHandler);

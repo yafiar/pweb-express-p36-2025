@@ -6,5 +6,5 @@ export const transactionsRouter = Router();
 
 transactionsRouter.post('/', /* requireAuth, */ createTransactionHandler);
 transactionsRouter.get('/', listTransactionsHandler);
-transactionsRouter.get('/:transaction_id', getTransactionDetailHandler);
 transactionsRouter.get('/statistics', getStatisticsHandler);
+transactionsRouter.get('/:transaction_id', getTransactionDetailHandler);
