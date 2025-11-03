@@ -3,6 +3,7 @@ import {
   createBookHandler, listBooksHandler, getBookDetailHandler,
   listBooksByGenreHandler, updateBookHandler, deleteBookHandler
 } from './books.controller';
+import { requireAuth } from '../../middleware/auth'; // ⬅️ add this
 
 export const booksRouter = Router();
 
@@ -12,3 +13,6 @@ booksRouter.get('/genre/:genre_id', listBooksByGenreHandler);
 booksRouter.get('/:book_id', getBookDetailHandler);
 booksRouter.patch('/:book_id', updateBookHandler);
 booksRouter.delete('/:book_id', deleteBookHandler);
+
+booksRouter.patch('/:book_id', requireAuth, updateBookHandler);  // ⬅️ add requireAuth
+booksRouter.delete('/:book_id', requireAuth, deleteBookHandler); // ⬅️ add requireAuth

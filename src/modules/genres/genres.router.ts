@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import { createGenreHandler, listGenresHandler, getGenreDetailHandler, updateGenreHandler, deleteGenreHandler } from './genres.controller';
+import { requireAuth } from '../../middleware/auth'; // ⬅️ add this
 
 export const genresRouter = Router();
 
@@ -8,3 +9,7 @@ genresRouter.get('/', listGenresHandler);
 genresRouter.get('/:genre_id', getGenreDetailHandler);
 genresRouter.patch('/:genre_id', updateGenreHandler);
 genresRouter.delete('/:genre_id', deleteGenreHandler);
+
+genresRouter.patch('/:genre_id', requireAuth, updateGenreHandler);  // ⬅️ add requireAuth
+genresRouter.delete('/:genre_id', requireAuth, deleteGenreHandler); // ⬅️ add requireAuth
+
